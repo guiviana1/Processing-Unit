@@ -48,22 +48,25 @@ void consumidora(int c) {
 }
 
 int main() {
-    std::vector<std::thread> consumidoras;
     std::vector<std::thread> produtoras;
+    std::vector<std::thread> consumidoras;
+    produtoras.reserve(NUM_PRODUTORAS);
+    consumidoras.reserve(NUM_CONSUMIDORAS);
 
     for (int c = 0; c < NUM_CONSUMIDORAS; c++) {
-        consumidoras.push_back(std::thread(consumidora, c));
+        consumidoras.emplace_back(consumidora, c);
     }
     for (int p = 0; p < NUM_PRODUTORAS; p++) {
-        produtoras.push_back(std::thread(produtora, p));
+        produtoras.emplace_back(produtora, p);
     }
 
-    for (int p = 0; p < NUM_PRODUTORAS; p++) {
-        produtoras[p].join();
+    for (auto& produtoraThread : produtoras) {
+        produtoraThread.join();
     }
     fila.encerrar();
-    for (int c = 0; c < NUM_CONSUMIDORAS; c++) {
-        consumidoras[c].join();
+
+    for (auto& consumidoraThread : consumidoras) {
+        consumidoraThread.join();
     }
 
     std::string resumo = "Resumo: ";
@@ -77,5 +80,6 @@ int main() {
     }
     resumo += " | total = " + std::to_string(total);
     imprimir(resumo);
+
     return 0;
 }
